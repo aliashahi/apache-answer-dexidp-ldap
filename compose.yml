@@ -1,0 +1,55 @@
+services:
+  answerdb:
+    container_name: answerdb
+    image: mars-registries:8002/mars/bitnami/postgresql:16.1.0-debian-11-r6
+    environment:
+      - POSTGRESQL_USERNAME=postgres
+      - POSTGRESQL_PASSWORD=postgres
+    volumes:
+      - answerdb-postgres-v:/bitnami/postgresql
+    healthcheck:
+      test: [ 'CMD-SHELL', 'pg_isready -U postgres' ]
+      interval: 5s
+      timeout: 2s
+      retries: 5
+    restart: unless-stopped
+    ports:
+      - 5433:5432
+
+  answer:
+    build: 
+      context: .
+      dockerfile: ./Dockerfile.answer
+    volumes:
+      - answer-data:/data
+    environment:
+      DB_TYPE: postgres
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: answerdb:5432
+      DB_NAME: postgres
+      LANGUAGE: en-US
+      SITE_NAME: 4G Q&A
+      SITE_URL: http://localhost:9080
+      CONTACT_EMAIL: aliakbarsh@systemgroup.net
+      ADMIN_NAME: admin
+      ADMIN_PASSWORD: admin123
+      ADMIN_EMAIL: aliakbarsh@systemgroup.net
+    ports:
+      - 9080:80
+    depends_on:
+      answerdb:
+        condition: service_healthy
+    network_mode: 'host'
+  dex:
+    build: 
+      context: .
+      dockerfile: ./Dockerfile.dex
+    volumes:
+      - ./config-ldap.yaml:/app/config.yaml
+    ports:
+      - 5556:5556
+    network_mode: 'host'
+volumes:
+  answerdb-postgres-v:
+  answer-data:

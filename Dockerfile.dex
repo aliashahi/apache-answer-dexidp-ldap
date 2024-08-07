@@ -1,0 +1,19 @@
+FROM golang:1.21.7
+
+ARG TIMEZONE
+ENV TIMEZONE=${TIMEZONE:-"Asia/Shanghai"}
+
+RUN apt update \
+    && apt install \
+        git \
+        make 
+
+WORKDIR /app
+
+RUN git clone --depth 1 --branch v2.40.0 https://github.com/dexidp/dex
+
+WORKDIR /app/dex
+
+RUN make build
+
+ENTRYPOINT ["/app/dex/bin/dex serve /app/config.yaml"]
