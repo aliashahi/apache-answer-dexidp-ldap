@@ -16,4 +16,4 @@ WORKDIR /app/dex
 
 RUN make build
 
-ENTRYPOINT ["/app/dex/bin/dex serve /app/config.yaml"]
+CMD ["/app/dex/bin/dex", "serve", "/app/config.yaml"]
